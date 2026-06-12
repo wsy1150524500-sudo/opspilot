@@ -33,3 +33,6 @@ config/ai.yaml
 config/hosts.yaml
 *.local.yaml
 .env
+
+# Kiro spec / planning docs (开发过程文档,不随仓库发布)
+.kiro/

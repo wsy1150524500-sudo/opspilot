@@ -1,36 +1,36 @@
 # OpsPilot
 
-A natural-language-driven operations agent for Linux servers. OpsPilot combines a traditional ops toolkit (system inspection, log analysis, SSH batch execution) with an **AI agent layer** that lets you describe a problem in plain language and have an LLM autonomously decide which tools to run, read the results, reason, and return operational advice.
+面向 Linux 服务器的自然语言运维 Agent。OpsPilot 在传统运维工具(系统巡检、日志分析、SSH 批量执行)的基础上,叠加了一层 **AI Agent**:你用自然语言描述问题,由大模型自主决定调用哪些工具、读取结果、推理分析,并给出运维建议。
 
-Works as both a **CLI tool** and a **FastAPI web service**, and supports **multiple model providers** — OpenAI, Anthropic (Claude), and OpenAI-compatible endpoints for Chinese mainstream models (DeepSeek, Qwen/DashScope, Zhipu GLM, Moonshot Kimi).
+支持以 **命令行工具** 和 **FastAPI 网络服务** 两种形态运行,并兼容**多家模型厂商** —— OpenAI、Anthropic(Claude),以及通过 OpenAI 兼容接口接入的国内主流模型(DeepSeek、通义千问/DashScope、智谱 GLM、Moonshot Kimi)。
 
-## Features
+## 功能特性
 
-- **System inspection** — CPU, memory, and disk metrics via `psutil`.
-- **Log analysis** — streaming log scan with pattern/level/time filtering and aggregation.
-- **SSH batch management** — run a command across many hosts concurrently with per-host failure isolation.
-- **AI agent layer** — natural-language requests driven through an agentic tool-calling loop.
-- **Multi-provider support** — pluggable provider adapters (strategy pattern + registry); add a new provider by registering one class.
-- **Interactive setup** — a setup wizard prompts for provider/URL/key/model and runs a connectivity + tool-calling health check before saving.
-- **Secure credentials** — API keys stored as `SecretStr`, redacted in logs, preferentially persisted as `${ENV}` references.
-- **Two surfaces** — a Typer/Rich CLI and a FastAPI REST API, both reusing the same service layer.
+- **系统巡检** —— 基于 `psutil` 采集 CPU、内存、磁盘指标。
+- **日志分析** —— 流式扫描日志,支持按模式/级别/时间过滤与聚合。
+- **SSH 批量管理** —— 并发在多台主机上执行命令,单台失败相互隔离。
+- **AI Agent 层** —— 通过工具调用循环(tool-calling loop)驱动自然语言请求。
+- **多厂商支持** —— 可插拔的 provider 适配器(策略模式 + 注册表),新增厂商只需注册一个类。
+- **交互式安装** —— 安装向导引导填写 provider / URL / API Key / 模型名,并在保存前做连通性与工具调用健康检测。
+- **凭据安全** —— API Key 以 `SecretStr` 存储,日志中自动脱敏,优先以 `${ENV}` 环境变量引用形式持久化。
+- **双入口** —— Typer/Rich 命令行与 FastAPI REST 接口,共用同一套 service 层。
 
-## Architecture
+## 项目架构
 
 ```
 ops_agent/
-├── core/        # System inspector, log analyzer, SSH manager, domain models
-├── services/    # Thin service adapters reused by CLI, web, and AI tools
-├── ai/          # AI agent layer: providers, tool registry, agent loop, setup wizard
-├── cli/         # Typer CLI (inspect / analyze / ssh / ai)
-└── web/         # FastAPI app + routers
+├── core/        # 系统巡检、日志分析、SSH 管理、领域模型
+├── services/    # 供 CLI、web、AI 工具复用的薄服务适配层
+├── ai/          # AI Agent 层:providers、工具注册表、agent 循环、安装向导
+├── cli/         # Typer 命令行(inspect / analyze / ssh / ai)
+└── web/         # FastAPI 应用 + 路由
 ```
 
-The agent core holds all ops logic. The CLI, web backend, and AI tools are all consumers of the same services — no business logic is duplicated.
+所有运维业务逻辑都集中在 core 层。CLI、web 后端、AI 工具都只是同一套 service 的使用方,不重复实现任何业务逻辑。
 
-## Installation
+## 安装
 
-Requires Python 3.10+.
+需要 Python 3.10+。
 
 ```bash
 git clone https://github.com/wsy1150524500-sudo/opspilot.git
@@ -45,80 +45,80 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Usage
+## 使用方法
 
-### CLI
+### 命令行
 
 ```bash
-# Inspect local system (pretty table, or --json)
+# 巡检本机系统(表格输出,或加 --json)
 python main.py inspect system
 python main.py inspect system --json
 
-# Analyze a log file
+# 分析日志文件
 python main.py analyze logs /var/log/syslog --pattern "ERROR" --level ERROR
 
-# Run a command across hosts from an inventory file
+# 从主机清单文件批量执行命令
 python main.py ssh run "df -h" --config config/hosts.yaml
 ```
 
 ### AI Agent
 
-First, configure a model provider. The wizard runs a connectivity check before saving:
+先配置模型 provider,向导会在保存前做一次连通性检测:
 
 ```bash
 python main.py ai setup
 ```
 
-Then ask in natural language — the agent decides which tools to call:
+然后用自然语言提问,Agent 会自主决定调用哪些工具:
 
 ```bash
-python main.py ai chat "why is this server slow?"
-python main.py ai chat "any errors in /var/log/syslog recently?" --show-transcript
+python main.py ai chat "这台服务器为什么变慢了?"
+python main.py ai chat "最近 /var/log/syslog 里有报错吗?" --show-transcript
 ```
 
-### Web API
+### Web 接口
 
 ```bash
 uvicorn ops_agent.web.server:app --host 0.0.0.0 --port 8000
 ```
 
-| Method | Path                   | Description                  |
-|--------|------------------------|------------------------------|
-| GET    | `/healthz`             | Health check                 |
-| GET    | `/api/v1/system`       | System snapshot              |
-| POST   | `/api/v1/logs/analyze` | Log analysis                 |
-| POST   | `/api/v1/ssh/run`      | SSH batch execution          |
-| POST   | `/api/v1/ai/chat`      | Natural-language AI agent    |
+| 方法   | 路径                   | 说明                  |
+|--------|------------------------|-----------------------|
+| GET    | `/healthz`             | 健康检查              |
+| GET    | `/api/v1/system`       | 系统快照              |
+| POST   | `/api/v1/logs/analyze` | 日志分析              |
+| POST   | `/api/v1/ssh/run`      | SSH 批量执行          |
+| POST   | `/api/v1/ai/chat`      | 自然语言 AI Agent     |
 
-Interactive API docs are available at `http://<host>:8000/docs`.
+交互式 API 文档:`http://<host>:8000/docs`。
 
-## Configuration
+## 配置说明
 
-Copy the example configs and fill in your values (real config files are git-ignored):
+复制示例配置并填入你自己的值(真实配置文件已被 git 忽略):
 
 ```bash
 cp config/ai.example.yaml config/ai.yaml
 cp config/hosts.example.yaml config/hosts.yaml
 ```
 
-API keys should be supplied via environment variables and referenced as `${VAR_NAME}` in the YAML.
+API Key 应通过环境变量提供,并在 YAML 中以 `${变量名}` 的形式引用。
 
-## Security
+## 安全须知
 
 > [!WARNING]
-> - **Never expose the web API publicly without authentication.** The `/api/v1/ssh/run` and `/api/v1/ai/chat` endpoints can execute commands on remote hosts. They currently have **no built-in auth** and CORS is permissive by default — add authentication, tighten CORS, and restrict network access before any non-local deployment.
-> - **The SSH tool is disabled for the AI agent by default** (`ssh_tool_enabled: false`). Only enable it with a strict `ssh_command_allowlist`.
-> - **Never commit real API keys or credentials.** Use `${ENV}` references; `config/ai.yaml` and `config/hosts.yaml` are git-ignored.
-> - The AI agent sends system/log/command data to your configured third-party model provider. Be aware of what data leaves the host.
+> - **切勿在未鉴权的情况下将 Web 接口暴露到公网。** `/api/v1/ssh/run` 和 `/api/v1/ai/chat` 可以在远程主机上执行命令,目前**没有内置鉴权**,且 CORS 默认放开 —— 在任何非本地部署前,务必加上鉴权、收紧 CORS 并限制网络访问。
+> - **AI Agent 的 SSH 工具默认关闭**(`ssh_tool_enabled: false`)。仅在配置了严格的 `ssh_command_allowlist` 命令白名单时才启用。
+> - **切勿提交真实的 API Key 或凭据。** 请使用 `${ENV}` 引用;`config/ai.yaml` 与 `config/hosts.yaml` 已被 git 忽略。
+> - AI Agent 会把系统/日志/命令数据发送给你配置的第三方模型厂商,请留意有哪些数据离开了本机。
 
-## Testing
+## 测试
 
 ```bash
 pytest
 ```
 
-The suite uses `pytest` and `hypothesis` for property-based tests, with a `FakeProvider` test double so the AI agent loop is tested without network access.
+测试套件使用 `pytest` 与 `hypothesis`(基于属性的测试),并提供 `FakeProvider` 测试替身,使 AI Agent 循环可在无网络的情况下完成测试。
 
-## License
+## 许可证
 
 MIT
