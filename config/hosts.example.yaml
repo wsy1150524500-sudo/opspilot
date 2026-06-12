@@ -1,0 +1,11 @@
+ssh_timeout_s: 15
+max_concurrency: 10
+hosts:
+  - name: web1
+    hostname: 10.0.0.11
+    username: ops
+    key_path: ~/.ssh/id_rsa
+  - name: web2
+    hostname: 10.0.0.12
+    username: ops
+    password: ${WEB2_PASSWORD}

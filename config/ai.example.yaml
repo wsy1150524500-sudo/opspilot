@@ -1,0 +1,17 @@
+provider:
+  kind: openai_compatible
+  base_url: https://api.deepseek.com/v1
+  api_key: ${DEEPSEEK_API_KEY}      # env-substituted at load; never commit raw keys
+  model: deepseek-chat
+  timeout_s: 30
+  max_tokens: 1024
+  temperature: 0.2
+max_iterations: 8
+ssh_tool_enabled: false             # enable only with an allowlist (see security notes)
+ssh_command_allowlist:
+  - "uptime"
+  - "df -h"
+  - "free -m"
+system_prompt: >
+  You are an operations assistant. Use the provided tools to inspect the system
+  and logs before answering. Be concise and cite the metrics you observed.
