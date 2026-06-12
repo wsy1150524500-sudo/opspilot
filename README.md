@@ -32,6 +32,25 @@ ops_agent/
 
 需要 Python 3.10+。
 
+### 一键交互式安装(推荐)
+
+克隆后运行安装脚本,它会引导你完成环境搭建、选择大模型、录入 API Key,并自动做连通性检测:
+
+```bash
+git clone https://github.com/wsy1150524500-sudo/opspilot.git
+cd opspilot
+
+# Linux / macOS
+bash install.sh
+
+# Windows (PowerShell)
+# powershell -ExecutionPolicy Bypass -File install.ps1
+```
+
+安装过程会在终端依次询问:接入哪个大模型(ChatGPT / DeepSeek / 通义千问 / 智谱 / Kimi / Claude / 自定义)、模型名称、API Key。API Key 存入 `.env`(权限 600),配置文件 `config/ai.yaml` 中只保留 `${ENV}` 引用,不落明文。
+
+### 手动安装
+
 ```bash
 git clone https://github.com/wsy1150524500-sudo/opspilot.git
 cd opspilot

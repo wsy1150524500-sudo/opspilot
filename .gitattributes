@@ -1,0 +1,5 @@
+# Shell 脚本必须使用 LF 行尾,否则在 Linux 上无法执行
+*.sh text eol=lf
+
+# 默认按文本处理,自动规范化行尾
+* text=auto
