@@ -92,6 +92,43 @@ uvicorn ops_agent.web.server:app --host 0.0.0.0 --port 8000
 
 交互式 API 文档:`http://<host>:8000/docs`。
 
+## Docker 部署
+
+推荐用 Docker 部署 Web 服务到云服务器。
+
+```bash
+# 1. 克隆代码
+git clone https://github.com/wsy1150524500-sudo/opspilot.git
+cd opspilot
+
+# 2. 准备配置(真实配置与 .env 均已被 git 忽略)
+cp config/ai.example.yaml config/ai.yaml
+cp config/hosts.example.yaml config/hosts.yaml
+cp .env.example .env
+# 编辑 config/ai.yaml 填入 provider/模型;编辑 .env 填入对应的 API Key
+vim config/ai.yaml
+vim .env
+
+# 3. 构建并启动
+docker compose up -d --build
+
+# 4. 查看状态与日志
+docker compose ps
+docker compose logs -f
+
+# 5. 验证(容器仅监听宿主机本地回环)
+curl http://127.0.0.1:8000/healthz
+```
+
+`docker-compose.yml` 默认把端口绑定到 `127.0.0.1:8000`,**不直接暴露公网**,需通过反向代理(Nginx/Caddy)+ 鉴权对外提供服务。`config/ai.yaml` 以只读卷挂载,改配置无需重建镜像。
+
+也可用同一个镜像跑命令行工具(传入的参数会覆盖默认的 uvicorn 启动命令):
+
+```bash
+docker build -t opspilot .
+docker run --rm opspilot python main.py inspect system
+```
+
 ## 配置说明
 
 复制示例配置并填入你自己的值(真实配置文件已被 git 忽略):

@@ -1,0 +1,28 @@
+# 虚拟环境 / 缓存
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.hypothesis/
+.mypy_cache/
+.ruff_cache/
+
+# IDE / Git
+.idea/
+.vscode/
+.git/
+.gitignore
+
+# Kiro 规划文档
+.kiro/
+
+# 测试与文档(运行时不需要)
+tests/
+README.md
+
+# 本地真实配置(含密钥,绝不进镜像)
+config/ai.yaml
+config/hosts.yaml
+*.local.yaml
+.env
