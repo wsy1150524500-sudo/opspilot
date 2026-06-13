@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     OpsPilot 交互式安装脚本 (Windows / PowerShell 版)
 
