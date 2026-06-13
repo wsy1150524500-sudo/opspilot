@@ -196,10 +196,14 @@ ok "API Key 已写入 $ENV_FILE (权限 600)"
 } > "$AI_CONFIG"
 ok "已生成 $AI_CONFIG"
 
-# 4c. 主机清单(若不存在则从示例复制)
-if [ ! -f "$HOSTS_CONFIG" ] && [ -f "config/hosts.example.yaml" ]; then
-    cp config/hosts.example.yaml "$HOSTS_CONFIG"
-    ok "已从示例生成 $HOSTS_CONFIG (按需编辑添加主机)"
+# 4c. 主机清单(默认生成空清单,避免示例主机导致校验失败;按需手动添加主机)
+if [ ! -f "$HOSTS_CONFIG" ]; then
+    {
+        echo "ssh_timeout_s: 15"
+        echo "max_concurrency: 10"
+        echo "hosts: []"
+    } > "$HOSTS_CONFIG"
+    ok "已生成空的 $HOSTS_CONFIG (如需 SSH 批量管理,参考 config/hosts.example.yaml 添加主机)"
 fi
 
 # ─────────────────────────────────────────────────────────

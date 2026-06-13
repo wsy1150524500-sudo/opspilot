@@ -135,10 +135,11 @@ $yaml += @(
 $yaml | Set-Content -Path $AiConfig -Encoding UTF8
 Write-Ok "已生成 $AiConfig"
 
-# 4c. hosts
-if ((-not (Test-Path $HostsConfig)) -and (Test-Path "config/hosts.example.yaml")) {
-    Copy-Item "config/hosts.example.yaml" $HostsConfig
-    Write-Ok "已从示例生成 $HostsConfig"
+# 4c. hosts(默认生成空清单,避免示例主机导致校验失败)
+if (-not (Test-Path $HostsConfig)) {
+    @("ssh_timeout_s: 15", "max_concurrency: 10", "hosts: []") |
+        Set-Content -Path $HostsConfig -Encoding UTF8
+    Write-Ok "已生成空的 $HostsConfig (如需 SSH 批量管理,参考 config/hosts.example.yaml 添加主机)"
 }
 
 # 5. 连通性检测
