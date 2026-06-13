@@ -31,6 +31,14 @@ def ai_chat(
     show_transcript: bool,
     json_out: bool,
 ) -> None:
+    import os
+
+    # 默认回退:未显式指定时,使用安装脚本生成的 config/ai.yaml
+    if config_path is None and os.path.exists("config/ai.yaml"):
+        config_path = "config/ai.yaml"
+    if hosts_config is None and os.path.exists("config/hosts.yaml"):
+        hosts_config = "config/hosts.yaml"
+
     ai_config = load_ai_config(config_path)
     app_config = load_config(hosts_config)
 

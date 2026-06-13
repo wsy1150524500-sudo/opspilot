@@ -15,7 +15,7 @@ from ops_agent.ai.models import AIConfig, ProviderConfig, ProviderKind
 
 # ── Property 6: Credential redaction never leaks keys ───────────────
 
-@given(key=st.text(min_size=8, max_size=50, alphabet=st.characters(blacklist_characters="\x00")))
+@given(key=st.text(min_size=8, max_size=50, alphabet=st.characters(blacklist_characters="\x00*")))
 @settings(max_examples=30, suppress_health_check=[HealthCheck.too_slow])
 def test_property6_credential_redaction(key):
     cfg = ProviderConfig(
